@@ -21,6 +21,8 @@ const GB_HEIGHT = 144;
 const ROM_KIND = 32560;
 const SAVE_KIND = 30078;
 const AUDIO_CHUNK_SIZE = 2048;
+const FRAME_DURATION_MS = (70224 / 4194304) * 1000;
+const MAX_CATCH_UP_FRAMES = 5;
 const SAVE_FORMAT = 'wasmboy-core-cartridge-ram-v1';
 const ROM_QUERY_LIMIT = 80;
 const NETWORK_AUTHOR_LIMIT = 96;
@@ -153,6 +155,7 @@ let currentUserPubkey = '';
 class GbAudio {
   private context: AudioContext | null = null;
   private nextStartTime = 0;
+  private sources = new Set<AudioBufferSourceNode>();
   enabled = false;
 
   async setEnabled(enabled: boolean): Promise<void> {
@@ -161,6 +164,7 @@ class GbAudio {
     elements.soundButton.classList.toggle('is-active', enabled);
 
     if (!enabled) {
+      this.reset();
       return;
     }
 
@@ -174,11 +178,10 @@ class GbAudio {
     if (this.context.state !== 'running') {
       await this.context.resume();
     }
-    this.nextStartTime = Math.max(this.nextStartTime, this.context.currentTime + 0.02);
   }
 
   pushFromCore(): void {
-    if (!this.enabled || !this.context) {
+    if (!this.enabled || !this.context || this.context.state !== 'running') {
       core.clearAudioBuffer();
       return;
     }
@@ -198,22 +201,40 @@ class GbAudio {
       right[index] = normalizeAudioByte(memory[sourceOffset + 1] ?? 129);
     }
 
+    const currentTime = this.context.currentTime;
+    // Cancel the old queue before rebasing; moving the cursor alone overlaps sound.
+    if (this.nextStartTime - currentTime > 0.3) {
+      this.reset();
+    }
+    if (this.nextStartTime <= currentTime) {
+      this.nextStartTime = currentTime + 0.05;
+    }
     const source = this.context.createBufferSource();
     source.buffer = buffer;
     source.connect(this.context.destination);
-    const currentTime = this.context.currentTime;
-    if (this.nextStartTime < currentTime) {
-      this.nextStartTime = currentTime + 0.02;
-    }
+    this.sources.add(source);
+    source.onended = () => {
+      this.sources.delete(source);
+      source.disconnect();
+    };
     source.start(this.nextStartTime);
     this.nextStartTime += sampleCount / 44100;
-    if (this.nextStartTime - currentTime > 0.3) {
-      this.nextStartTime = currentTime + 0.05;
+    core.clearAudioBuffer();
+  }
+
+  reset(): void {
+    for (const source of this.sources) {
+      source.onended = null;
+      source.stop();
+      source.disconnect();
     }
+    this.sources.clear();
+    this.nextStartTime = 0;
     core.clearAudioBuffer();
   }
 
   close(): void {
+    this.reset();
     void this.context?.close();
     this.context = null;
   }
@@ -925,11 +946,30 @@ function initializeCore(romBytes: Uint8Array): void {
 
 function startLoop(): void {
   stopLoop();
+  let lastTime: number | null = null;
+  let accumulatedTime = 0;
 
-  const tick = () => {
-    if (!isPaused && isCoreLoaded) {
-      runCoreFrame();
-      renderFrame();
+  const tick = (time: number) => {
+    if (isPaused || !isCoreLoaded || document.hidden) {
+      lastTime = null;
+      accumulatedTime = 0;
+    } else {
+      const elapsed = lastTime === null ? 0 : Math.max(0, time - lastTime);
+      lastTime = time;
+      // A stalled/background tab must not replay seconds of missed emulation.
+      if (elapsed > 250) {
+        accumulatedTime = 0;
+        audio.reset();
+      } else {
+        accumulatedTime = Math.min(accumulatedTime + elapsed, FRAME_DURATION_MS * MAX_CATCH_UP_FRAMES);
+        let frames = 0;
+        while (accumulatedTime >= FRAME_DURATION_MS && !isPaused) {
+          accumulatedTime -= FRAME_DURATION_MS;
+          runCoreFrame();
+          frames += 1;
+        }
+        if (frames > 0) renderFrame();
+      }
     }
     animationFrame = window.requestAnimationFrame(tick);
   };
@@ -938,6 +978,7 @@ function startLoop(): void {
 }
 
 function stopLoop(): void {
+  audio.reset();
   if (animationFrame) {
     window.cancelAnimationFrame(animationFrame);
     animationFrame = 0;
@@ -956,6 +997,7 @@ function runCoreFrame(): void {
     audio.pushFromCore();
     if (result < 0) {
       isPaused = true;
+      audio.reset();
       setStatus('error', 'Emulator stopped');
     }
     return;
@@ -1531,6 +1573,8 @@ async function handleAction(action: () => void | Promise<void>): Promise<void> {
 
 elements.pauseButton.addEventListener('click', () => {
   isPaused = !isPaused;
+  if (isPaused) stopLoop();
+  else if (isCoreLoaded) startLoop();
   elements.pauseButton.textContent = isPaused ? 'Play' : 'Pause';
 });
 
@@ -1634,8 +1678,11 @@ window.addEventListener('blur', () => {
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
+    stopLoop();
     releaseButtonInputs('keyboard');
     releaseButtonInputs('pointer');
+  } else if (isCoreLoaded && !isPaused) {
+    startLoop();
   }
 });
 

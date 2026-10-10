@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node scripts/measure-ui.mjs",
     "test:rom-sources": "node scripts/test-rom-sources.mjs",
+    "test:playback": "node scripts/test-playback.mjs",
     "test:deploy-roms": "node scripts/test-deploy-roms.mjs",
     "build:rom": "node scripts/build-rom.mjs",
     "deploy:roms": "node scripts/deploy-roms.mjs",
