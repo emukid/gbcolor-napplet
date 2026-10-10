@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GB Color</title>
+  </head>
+  <body>
+    <main id="app" class="app-shell" data-gbc-root>
+      <section class="workspace" aria-labelledby="app-title" data-gbc-measure="workspace">
+        <section class="device-face" aria-label="GBColor handheld face" data-gbc-measure="device-face" data-view="game">
+          <button
+            id="domainIndicator"
+            class="domain-indicator"
+            type="button"
+            aria-label="NAP domains"
+            aria-describedby="domainGrid"
+          >?</button>
+          <div class="shell-grid" id="domainGrid" role="tooltip" aria-label="Shell domains"></div>
+
+          <section id="gameView" class="game-view" aria-label="Gaming view">
+            <section class="screen-well" aria-label="Game screen" data-gbc-measure="screen-well">
+              <div class="screen-aperture" data-gbc-measure="screen-aperture">
+                <canvas id="screen" width="160" height="144" data-gbc-measure="screen"></canvas>
+              </div>
+              <div id="bootOverlay" class="boot-overlay">
+                <h1 id="app-title">GB Color</h1>
+                <output id="status" class="status status-idle" data-gbc-measure="status">Starting</output>
+              </div>
+            </section>
+
+            <nav class="gamepad" aria-label="Gamepad" data-gbc-measure="gamepad">
+              <div class="dpad" aria-label="Directional pad" data-gbc-measure="dpad">
+                <button class="dpad-key dpad-up" data-button="up" type="button" aria-label="Up">
+                  <span>Up</span>
+                </button>
+                <button class="dpad-key dpad-left" data-button="left" type="button" aria-label="Left">
+                  <span>Left</span>
+                </button>
+                <span class="dpad-cap" aria-hidden="true"></span>
+                <button class="dpad-key dpad-right" data-button="right" type="button" aria-label="Right">
+                  <span>Right</span>
+                </button>
+                <button class="dpad-key dpad-down" data-button="down" type="button" aria-label="Down">
+                  <span>Down</span>
+                </button>
+              </div>
+
+              <button class="action-button button-b" data-button="b" type="button" data-gbc-measure="button-b">B</button>
+              <button class="action-button button-a" data-button="a" type="button" data-gbc-measure="button-a">A</button>
+              <button class="system-button button-select" data-button="select" type="button" data-gbc-measure="button-select">Select</button>
+              <button class="system-button button-start" data-button="start" type="button" data-gbc-measure="button-start">Start</button>
+            </nav>
+          </section>
+
+          <section id="gamesView" class="games-view" aria-label="Games" aria-hidden="true" data-gbc-measure="games-view">
+            <div class="games-header">
+              <div class="games-title-block">
+                <h2>Games</h2>
+                <output id="gamesStatus" class="games-status"></output>
+              </div>
+              <div class="games-controls">
+                <div class="scope-toggle" role="group" aria-label="Game source">
+                  <button type="button" data-rom-scope="mine" aria-pressed="true">Mine</button>
+                  <button type="button" data-rom-scope="network" aria-pressed="false">Network</button>
+                  <button type="button" data-rom-scope="global" aria-pressed="false">Global</button>
+                </div>
+                <button id="openFileButton" class="open-file-button" type="button">Open File</button>
+                <input id="romFileInput" class="rom-file-input" type="file" accept=".gb,.gbc,application/octet-stream" />
+              </div>
+            </div>
+            <div id="gameGrid" class="game-grid" data-gbc-measure="game-grid"></div>
+            <select id="romSelect" class="rom-select" aria-label="Games"></select>
+          </section>
+
+          <dialog id="saveDialog" class="save-dialog" aria-labelledby="save-dialog-title" data-gbc-measure="save-dialog">
+            <form method="dialog" class="save-dialog-frame">
+              <div class="save-dialog-header">
+                <h2 id="save-dialog-title">Save File</h2>
+                <button id="saveCloseButton" class="icon-button" type="button" aria-label="Close save files">x</button>
+              </div>
+              <div class="save-dialog-actions">
+                <button id="saveButton" type="button">Save</button>
+                <button id="loadSaveButton" type="button">Load</button>
+              </div>
+              <ol id="saveList" class="save-list" aria-label="Save files"></ol>
+            </form>
+          </dialog>
+
+          <nav class="bottom-bar" aria-label="Emulator controls" data-gbc-measure="bottom-bar">
+            <button id="pauseButton" type="button">Pause</button>
+            <button id="soundButton" type="button" aria-pressed="false">Sound</button>
+            <button id="gamesButton" type="button">Games</button>
+            <button id="saveFileButton" type="button">Save File</button>
+          </nav>
+
+          <output id="statusMirror" class="status-mirror" aria-hidden="true"></output>
+        </section>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

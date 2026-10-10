@@ -1,0 +1,42 @@
+{
+  "kind": 35129,
+  "created_at": 1787860143,
+  "tags": [
+    [
+      "d",
+      "gbcolor"
+    ],
+    [
+      "path",
+      "/index.html",
+      "825de6d265dcb72dcf9bf5afdf1b3d9bd3e836c08b568858dec6b90c4772d51d"
+    ],
+    [
+      "x",
+      "a4cdc27e48da471c5b556d1b15167a0e98ac52c631a0dedc4ab850e38b05a778",
+      "aggregate"
+    ],
+    [
+      "requires",
+      "identity"
+    ],
+    [
+      "requires",
+      "keys"
+    ],
+    [
+      "requires",
+      "outbox"
+    ],
+    [
+      "requires",
+      "relay"
+    ],
+    [
+      "requires",
+      "resource"
+    ]
+  ],
+  "content": "",
+  "aggregateHash": "a4cdc27e48da471c5b556d1b15167a0e98ac52c631a0dedc4ab850e38b05a778"
+}

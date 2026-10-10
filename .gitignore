@@ -1,0 +1,6 @@
+node_modules/
+.codebase-memory/
+.planning/
+.napplet/
+.rom-cache/
+src/generated/

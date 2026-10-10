@@ -1,0 +1,38 @@
+{
+  "name": "@hyprgate/napp-gbcolor",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "paja": "kehto paja --target-url http://localhost:5193 -- pnpm vite --host 127.0.0.1",
+    "build": "tsc && vite build",
+    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/measure-ui.mjs",
+    "test:rom-sources": "node scripts/test-rom-sources.mjs",
+    "test:deploy-roms": "node scripts/test-deploy-roms.mjs",
+    "build:rom": "node scripts/build-rom.mjs",
+    "deploy:roms": "node scripts/deploy-roms.mjs",
+    "conformance": "pnpm build && napplet-conformance ./dist",
+    "test:conformance": "pnpm conformance",
+    "check:bundle": "node scripts/check-bundle.mjs"
+  },
+  "dependencies": {
+    "@napplet/sdk": "0.28.0",
+    "@napplet/shim": "0.30.0",
+    "wasmboy": "0.7.1"
+  },
+  "devDependencies": {
+    "@kehto/cli": "^0.5.0",
+    "@napplet/conformance": "^0.16.2",
+    "@napplet/conformance-cli": "^0.2.18",
+    "@napplet/vite-plugin": "0.14.1",
+    "nostr-tools": "2.24.2",
+    "playwright": "1.61.1",
+    "qrcode-terminal": "0.12.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.1",
+    "ws": "8.18.3"
+  }
+}
