@@ -17,15 +17,19 @@ export const ROM_MIME = "application/vnd.nintendo.gb-rom";
 export const ROM_TRANSPORT_MIME = "text/plain; charset=utf-8";
 export const DEFAULT_CONNECTION_RELAY = "wss://bucket.coracle.social";
 export const DEFAULT_EVENT_RELAYS = [
+  "wss://relay.nappley.soy",
   "wss://nos.lol",
   "wss://relay.primal.net",
-  "wss://relay.damus.io",
+  "wss://nostrue.com",
+  "wss://schnorr.me",
+  "wss://nostr.kosmos.org"
 ];
 export const DEFAULT_BLOSSOM_SERVERS = [
+  "https://blossom.napplet.soy",
   "https://cdn.hzrd149.com",
-  "https://blssm.us",
   "https://nostr.download",
   "https://blossom.primal.net",
+  "https://24242.io"
 ];
 
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules"]);

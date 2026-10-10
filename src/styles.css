@@ -61,9 +61,9 @@ button {
   cursor: pointer;
 }
 
-button:hover,
-button.is-active,
-button.is-pressed {
+button:hover:not(:disabled):not(.game-primary),
+button.is-active:not(:disabled):not(.game-primary),
+button.is-pressed:not(:disabled):not(.game-primary) {
   border-color: var(--gbc-accent);
   background: color-mix(in srgb, var(--gbc-accent) 28%, var(--gbc-control));
 }
@@ -678,7 +678,7 @@ h2 {
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
-    minmax(min(100%, max(calc(var(--u) * 150), 5.6rem)), 1fr)
+    minmax(min(100%, max(calc(var(--u) * var(--cartridge-width, 150)), var(--cartridge-min, 5.6rem))), 1fr)
   );
   gap: max(calc(var(--u) * 20), 0.7rem);
   align-content: start;
@@ -767,7 +767,18 @@ h2 {
 
 .game-primary:hover,
 .game-primary:focus-visible {
-  background: color-mix(in srgb, var(--gbc-accent) 12%, transparent);
+  background: transparent;
+  outline: none;
+}
+
+.game-card:hover,
+.game-card:has(.game-primary:focus-visible) {
+  border-color: var(--gbc-accent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gbc-accent) 45%, transparent);
+}
+
+.game-card:has(.game-primary:focus-visible) {
+  box-shadow: inset 0 0 0 3px var(--gbc-accent);
 }
 
 .game-title,
@@ -896,10 +907,27 @@ h2 {
 
 .save-dialog-frame {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-auto-rows: max-content;
   gap: 0.75rem;
   max-height: inherit;
   padding: 0.85rem;
+  overflow: auto;
+}
+
+.save-destination { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.save-destination select, .save-destination input { min-width: 0; width: 100%; color: var(--gbc-text); background: var(--gbc-shell); padding: 6px; }
+.save-hint, .save-status { margin: 0; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.save-list[hidden] { display: none; }
+.save-status:empty { display: none; }
+@media (max-width: 240px) {
+  .save-destination { grid-template-columns: minmax(0, 1fr); }
+  .save-destination > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+@media (max-height: 300px) {
+  .save-dialog { max-height: calc(100dvh - 8px); }
+  .save-dialog-frame { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
+  .save-dialog-frame > * { flex-shrink: 0; }
+  .save-hint { display: none; }
 }
 
 .save-dialog-header,
@@ -1425,3 +1453,245 @@ h2 {
     height: clamp(26px, 18dvh, 36px);
   }
 }
+
+
+.save-rename-editor { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; padding: 6px; }
+.save-rename-editor[hidden] { display: none; }
+.save-rename-editor input { min-width: 0; width: 100%; color: var(--gbc-text); background: var(--gbc-shell); }
+@media (max-width: 400px) {
+  .save-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .save-row > .save-name, .save-row > .save-details { grid-column: 1 / -1; }
+  .save-rename-editor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .save-rename-editor input { grid-column: 1 / -1; }
+}
+
+.save-dialog [hidden] { display: none !important; }
+#resumePrompt { display: grid; gap: 8px; }
+#resumePrompt p { margin: 0; }
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+.rom-loading-dialog:not([hidden]) {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  overflow: auto;
+  background: color-mix(in srgb, var(--gbc-shell) 90%, transparent);
+  color: var(--gbc-text);
+  backdrop-filter: blur(5px);
+  font-size: 13px;
+}
+.rom-loading-dialog p { margin: 0; overflow-wrap: anywhere; text-align: center; }
+.rom-loading-dialog button { padding: 4px 8px; min-height: 28px; font-size: 12px; }
+.rom-loading-spinner { width: 24px; height: 24px; flex: 0 0 24px; border: 3px solid var(--gbc-muted); border-top-color: var(--gbc-accent); border-radius: 50%; animation: rom-loading-spin .8s linear infinite; }
+@keyframes rom-loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .rom-loading-spinner { animation: none; } }
+
+
+.rom-reaction {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  min-width: 44px;
+  min-height: 32px;
+  padding: 4px 8px;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--gbc-text);
+  background: var(--gbc-shell);
+  font-size: 14px;
+}
+.game-card:hover .rom-reaction,
+.game-card:focus-within .rom-reaction {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rom-reaction[aria-pressed="true"] { color: var(--gbc-accent); }
+.rom-reaction:disabled { filter: none; }
+@media (hover: none) {
+  .rom-reaction { opacity: 1; pointer-events: auto; }
+}
+
+.console-reaction {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 9;
+}
+.console-reaction .rom-reaction {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.screen-toggle {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: 16px;
+  background: var(--gbc-shell);
+}
+.screen-well:hover .screen-toggle,
+.screen-well:focus-within .screen-toggle {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  .screen-toggle { opacity: 1; pointer-events: auto; }
+}
+.device-face[data-maximized="true"] {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  background: #000;
+}
+.device-face[data-maximized="true"] .gamepad,
+.device-face[data-maximized="true"] .bottom-bar,
+.device-face[data-maximized="true"] .status-mirror,
+.device-face[data-maximized="true"] .console-reaction,
+.device-face[data-maximized="true"] .domain-indicator,
+.device-face[data-maximized="true"] .shell-grid,
+.device-face[data-maximized="true"] .screen-well::before {
+  display: none;
+}
+.device-face[data-maximized="true"] .screen-well {
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+}
+.device-face[data-maximized="true"] .screen-aperture {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+}
+.device-face[data-maximized="true"] #screen {
+  width: min(100vw, calc(100dvh * 160 / 144));
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.rom-download {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 16px;
+  background: var(--gbc-shell);
+}
+.game-card:hover .rom-download,
+.game-card:focus-within .rom-download { opacity: 1; pointer-events: auto; }
+@media (hover: none) { .rom-download { opacity: 1; pointer-events: auto; } }
+
+.rom-info {
+  position: absolute;
+  top: 46px;
+  right: 8px;
+  z-index: 3;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
+  font-size: 16px;
+}
+.game-grid.is-detail { display: block; }
+.rom-detail { min-width: 0; font-size: 14px; }
+.rom-detail h2 { font-size: 20px; margin: 12px 0; overflow-wrap: anywhere; }
+.rom-detail h3, .rom-detail h4 { font-size: 14px; margin: 8px 0; overflow-wrap: anywhere; }
+.rom-detail p { font-size: 13px; margin: 4px 0 12px; }
+.rom-author-group { margin-bottom: 16px; }
+.rom-detail-option { padding: 12px 0; border-top: 1px solid var(--gbc-muted); min-width: 0; }
+.rom-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.rom-detail button { min-height: 32px; padding: 4px 8px; font-size: 13px; max-width: 100%; }
+.rom-detail-actions .rom-reaction, .rom-detail-actions .rom-download {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+}
+.rom-detail dl { display: grid; grid-template-columns: minmax(0, 90px) minmax(0, 1fr); gap: 8px; margin: 12px 0 0; font-size: 13px; }
+.rom-detail dt { opacity: 0.7; }
+.rom-detail dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+@media (max-width: 300px) {
+  .rom-detail dl { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .rom-detail dd { margin-bottom: 8px; }
+}
+@media (min-width: 900px) {
+  .rom-author-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); column-gap: 16px; }
+  .rom-author-group > h3, .rom-author-group > p { grid-column: 1 / -1; }
+}
+
+.library-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; min-width: 0; }
+#cartridgeSize { width: auto; min-width: 0; max-width: 100%; padding: 3px 6px; font: inherit; font-size: 12px; }
+.game-grid[data-cartridge-size="small"] { --cartridge-width: 110; --cartridge-min: 5rem; }
+.game-grid[data-cartridge-size="large"] { --cartridge-width: 220; --cartridge-min: 8rem; }
+@media (max-width: 240px) {
+  #cartridgeSize { font-size: 10px; padding: 1px; }
+  .library-tools { gap: 3px; }
+  .game-grid[data-cartridge-size="small"] .game-card { height: 4.5rem; min-height: 4.5rem; }
+  .game-grid[data-cartridge-size="large"] .game-card { height: 8rem; min-height: 8rem; }
+}
+
+.bottom-bar { grid-template-columns: repeat(3, minmax(0, 1fr)) auto minmax(0, 1fr); }
+#settingsDialog { box-sizing: border-box; width: calc(100% - 16px); max-width: 560px; max-height: calc(100dvh - 16px); padding: 12px; overflow: auto; color: var(--gbc-text); background: var(--gbc-shell); border: 1px solid var(--gbc-muted); border-radius: 8px; font-size: 14px; }
+#settingsDialog::backdrop { backdrop-filter: blur(5px); background: #0007; }
+.settings-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+#settingsDialog h2 { font-size: 20px; }
+#settingsDialog label:not([hidden]) { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+#settingsDialog input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--gbc-accent); }
+#settingsDialog select, #settingsDialog button { width: auto; max-width: 100%; font-size: 14px; min-height: 30px; padding: 4px 8px; }
+#settingsDialog p { font-size: 12px; opacity: .7; }
+
+#romVersionDialog { box-sizing: border-box; width: calc(100% - 16px); max-width: none; max-height: calc(100dvh - 16px); padding: 12px; overflow: auto; color: var(--gbc-text); background: var(--gbc-shell); border: 1px solid var(--gbc-muted); border-radius: 8px; font-size: 14px; }
+#romVersionDialog::backdrop { backdrop-filter: blur(5px); background: #0007; }
+#romVersionDialog h2 { font-size: 20px; overflow-wrap: anywhere; }
+#romVersionDialog h3 { font-size: 13px; overflow-wrap: anywhere; margin: 16px 0 8px; }
+#romVersionDialog label { display: flex; align-items: start; gap: 8px; padding: 8px 0; }
+#romVersionDialog input { width: 18px; height: 18px; flex: 0 0 18px; accent-color: var(--gbc-accent); }
+#romVersionList label { border-top: 1px solid var(--gbc-muted); cursor: pointer; }
+#romVersionList label:has(input:checked) { background: color-mix(in srgb, var(--gbc-accent) 15%, transparent); }
+#romVersionList span { min-width: 0; overflow-wrap: anywhere; }
+#romVersionList strong, #romVersionList small { display: block; }
+#romVersionList small { margin-top: 4px; opacity: .7; }
+.version-footer { border-top: 1px solid var(--gbc-muted); margin-top: 12px; }
+.version-footer > div { display: flex; flex-wrap: wrap; gap: 8px; }
+#romVersionDialog button { min-height: 32px; padding: 4px 8px; font-size: 14px; }
+
+/* Let the screen receive hover through the gamepad's empty layout area. */
+.gamepad { pointer-events: none; }
+.gamepad button { pointer-events: auto; }
+
+.screen-toggle svg { display: block; }

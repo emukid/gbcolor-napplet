@@ -98,6 +98,15 @@ export function collectRomByteSources(
   return sources;
 }
 
+/** ROM identity must describe decoded cartridge bytes, not an encoded download. */
+export function romContentHash(content: Record<string, unknown>, tags: readonly string[][], sources: readonly RomByteSource[]): string | undefined {
+  const candidates = [
+    readString(content, 'sha256'), readTag(tags, 'sha256'), readLegacySha256Tag(tags),
+    ...sources.map(source => source.encoding ? source.decodedSha256 : source.sha256),
+  ];
+  return candidates.find(value => typeof value === 'string' && HEX_64.test(value))?.toLowerCase();
+}
+
 export function decodeRomTransport(
   bytes: Uint8Array,
   source: Pick<RomByteSource, 'encoding' | 'label'>,

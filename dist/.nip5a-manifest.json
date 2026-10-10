@@ -1,6 +1,6 @@
 {
   "kind": 35129,
-  "created_at": 1791606602,
+  "created_at": 1791614731,
   "tags": [
     [
       "d",
@@ -9,20 +9,16 @@
     [
       "path",
       "/index.html",
-      "ef9c0fadf6946c8c15d5189a6146617ec4a39dbe4156e4d634ab6f8057746e0c"
+      "21e30d4db5499008d7de8c2d60426632b5952cfb7964a5983872bc7aca92eed5"
     ],
     [
       "x",
-      "e659d35fc9e7fa376bef2eaa35c4300b09efc96059cbe086b23e215c83bf83a7",
+      "011d3d2a1a3491eec4f76072841737807647209bbce21704ef6d64d1972256ef",
       "aggregate"
     ],
     [
       "requires",
       "identity"
-    ],
-    [
-      "requires",
-      "keys"
     ],
     [
       "requires",
@@ -35,8 +31,48 @@
     [
       "requires",
       "resource"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/load"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/open"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/browse"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/settings"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/pause"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/resume"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/sound"
+    ],
+    [
+      "archetype",
+      "gameboy",
+      "napplet:gameboy/maximize"
     ]
   ],
   "content": "",
-  "aggregateHash": "e659d35fc9e7fa376bef2eaa35c4300b09efc96059cbe086b23e215c83bf83a7"
+  "aggregateHash": "011d3d2a1a3491eec4f76072841737807647209bbce21704ef6d64d1972256ef"
 }

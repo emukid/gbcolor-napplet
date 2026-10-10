@@ -9,6 +9,14 @@ declare module 'wasmboy/dist/core/core.esm.js' {
   export const AUDIO_BUFFER_LOCATION: number;
   export const CARTRIDGE_RAM_LOCATION: number;
   export const CARTRIDGE_ROM_LOCATION: number;
+  export const GAMEBOY_INTERNAL_MEMORY_LOCATION: number;
+  export const GAMEBOY_INTERNAL_MEMORY_SIZE: number;
+  export const GRAPHICS_OUTPUT_LOCATION: number;
+  export const GRAPHICS_OUTPUT_SIZE: number;
+  export const CARTRIDGE_RAM_SIZE: number;
+  export function captureSnapshotRegisters(): Record<string, Record<string, number | boolean>>;
+  export function validateSnapshotRegisters(registers: unknown): void;
+  export function restoreSnapshotRegisters(registers: Record<string, Record<string, number | boolean>>): void;
 
   export function config(
     enableBootRom: number,

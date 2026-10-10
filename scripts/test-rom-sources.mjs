@@ -10,7 +10,7 @@ const compiled = ts.transpileModule(source, {
   },
 });
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled.outputText).toString("base64")}`;
-const { collectRomByteSources, decodeRomTransport } = await import(moduleUrl);
+const { collectRomByteSources, decodeRomTransport, romContentHash } = await import(moduleUrl);
 
 const sha256 = "0a0e8018dbbc8d7f8cd99f05e7cdc7b4cc9e358ecfe9377ebfb2291a84c6e310";
 const infohash = "0123456789abcdef0123456789abcdef01234567";
@@ -163,3 +163,13 @@ assert.throws(
 }
 
 console.log("ROM source parsing tests passed");
+
+const rawHash = 'a'.repeat(64);
+const transportHash = 'b'.repeat(64);
+const encoded = { kind: 'blossom', label: 'Blossom', url: 'blossom:sha256:' + transportHash, encoding: 'base64', sha256: transportHash, decodedSha256: rawHash };
+assert.equal(romContentHash({}, [], [encoded]), rawHash);
+assert.equal(romContentHash({ sha256: 'invalid' }, [], [encoded]), rawHash);
+assert.equal(romContentHash({ sha256: rawHash.toUpperCase() }, [], [encoded]), rawHash);
+assert.equal(romContentHash({}, [], [{ ...encoded, decodedSha256: undefined }]), undefined);
+assert.equal(romContentHash({}, [], [{ ...encoded, decodedSha256: undefined }, { ...encoded, encoding: undefined, sha256: rawHash }]), rawHash);
+console.log('ROM identity tests passed: decoded versus transport hash, valid fallback, case normalization.');

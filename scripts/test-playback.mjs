@@ -27,11 +27,11 @@ function loopHarness() {
   const callbacks = new Map();
   const handlers = {};
   const scope = {
-    isPaused: false, isCoreLoaded: true, animationFrame: 0,
+    isPaused: false, isCoreLoaded: true, activeRom: {}, animationFrame: 0,
     runCoreFrame() { frames++; }, renderFrame() { renders++; },
     audio: { reset() { resets++; } },
     releaseButtonInputs() {},
-    elements: { pauseButton: { addEventListener(event, fn) { handlers.pause = fn; } } },
+    elements: { saveFileButton: {}, pauseButton: { addEventListener(event, fn) { handlers.pause = fn; } } },
     document: { hidden: false, addEventListener(event, fn) { handlers.visibility = fn; } },
     window: {
       requestAnimationFrame(fn) { callbacks.set(++nextId, fn); return nextId; },
@@ -39,7 +39,7 @@ function loopHarness() {
     },
   };
   vm.createContext(scope);
-  vm.runInContext(declarations(['FRAME_DURATION_MS', 'MAX_CATCH_UP_FRAMES', 'startLoop', 'stopLoop'])
+  vm.runInContext(declarations(['FRAME_DURATION_MS', 'MAX_CATCH_UP_FRAMES', 'startLoop', 'stopLoop', 'updateSaveAvailability'])
     + listener('elements.pauseButton', 'click') + listener('document', 'visibilitychange'), scope);
   return {
     scope, handlers, get frames() { return frames; }, get renders() { return renders; }, get resets() { return resets; },

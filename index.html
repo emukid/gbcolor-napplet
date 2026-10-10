@@ -19,8 +19,15 @@
           <div class="shell-grid" id="domainGrid" role="tooltip" aria-label="Shell domains"></div>
 
           <section id="gameView" class="game-view" aria-label="Gaming view">
+            <div id="consoleReaction" class="console-reaction" aria-label="Current ROM reaction"></div>
             <section class="screen-well" aria-label="Game screen" data-gbc-measure="screen-well">
               <div class="screen-aperture" data-gbc-measure="screen-aperture">
+                <button id="screenToggle" class="screen-toggle" type="button" aria-label="Maximize game screen" aria-pressed="false" title="Maximize game screen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 4H4v5 M15 4h5v5 M20 15v5h-5 M9 20H4v-5" /></svg></button>
+                <div id="romLoadingDialog" class="rom-loading-dialog" role="status" aria-live="polite" hidden>
+                  <span class="rom-loading-spinner" aria-hidden="true"></span>
+                  <p id="romLoadingName"></p>
+                  <button id="cancelRomLoad" type="button">Cancel</button>
+                </div>
                 <canvas id="screen" width="160" height="144" data-gbc-measure="screen"></canvas>
               </div>
               <div id="bootOverlay" class="boot-overlay">
@@ -61,11 +68,18 @@
               </div>
               <div class="games-controls">
                 <div class="scope-toggle" role="group" aria-label="Game source">
-                  <button type="button" data-rom-scope="mine" aria-pressed="true">Mine</button>
+                  <button type="button" data-rom-scope="mine" aria-pressed="false">Mine</button>
                   <button type="button" data-rom-scope="network" aria-pressed="false">Network</button>
-                  <button type="button" data-rom-scope="global" aria-pressed="false">Global</button>
+                  <button type="button" data-rom-scope="global" aria-pressed="true">Global</button>
                 </div>
-                <button id="openFileButton" class="open-file-button" type="button">Open File</button>
+                <div class="library-tools">
+                  <select id="cartridgeSize" aria-label="Cartridge size" title="Cartridge size">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                  <button id="openFileButton" class="open-file-button" type="button">Load ROM</button>
+                </div>
                 <input id="romFileInput" class="rom-file-input" type="file" accept=".gb,.gbc,application/octet-stream" />
               </div>
             </div>
@@ -73,25 +87,60 @@
             <select id="romSelect" class="rom-select" aria-label="Games"></select>
           </section>
 
+
+
           <dialog id="saveDialog" class="save-dialog" aria-labelledby="save-dialog-title" data-gbc-measure="save-dialog">
             <form method="dialog" class="save-dialog-frame">
               <div class="save-dialog-header">
-                <h2 id="save-dialog-title">Save File</h2>
+                <h2 id="save-dialog-title">Save / Load</h2>
                 <button id="saveCloseButton" class="icon-button" type="button" aria-label="Close save files">x</button>
               </div>
+              <div id="resumePrompt" hidden>
+                <p>Load your latest save?</p>
+                <div class="save-dialog-actions"><button id="resumeYes" type="button">Yes</button><button id="resumeNo" type="button">No</button></div>
+                <button id="resumeBrowse" type="button">Browse saves</button>
+              </div>
+              <label class="save-destination" for="saveDestination"><span>Location</span>
+                <select id="saveDestination">
+                  <option value="nostr">Nostr saves</option>
+                  <option id="filesystemOption" value="filesystem" hidden disabled>Filesystem</option>
+                </select>
+              </label>
+              <p id="saveHint" class="save-hint"></p>
               <div class="save-dialog-actions">
                 <button id="saveButton" type="button">Save</button>
                 <button id="loadSaveButton" type="button">Load</button>
               </div>
+              <ol id="filesystemSaves" class="save-list" aria-label="Filesystem saves" hidden></ol>
               <ol id="saveList" class="save-list" aria-label="Save files"></ol>
+              <output id="saveStatus" class="save-status" role="status" aria-live="polite"></output>
             </form>
+          </dialog>
+
+          <dialog id="romVersionDialog" aria-labelledby="romVersionTitle">
+            <h2 id="romVersionTitle">Choose version</h2>
+            <div id="romVersionList"></div>
+            <div class="version-footer">
+              <label><input id="rememberRomVersion" type="checkbox" /> Remember my selection</label>
+              <div><button id="cancelRomVersion" type="button">Cancel</button><button id="loadRomVersion" type="button" disabled>Load ROM</button></div>
+            </div>
+          </dialog>
+          <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+            <div class="settings-heading"><h2 id="settingsTitle">Settings</h2><button id="closeSettings" type="button">Close</button></div>
+            <label><input id="settingsSound" type="checkbox" /> Sound</label>
+            <label>Cartridge size <select id="settingsSize"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></label>
+            <label>Library <select id="settingsScope"><option value="mine">Mine</option><option value="network">Network</option><option value="global">Global</option></select></label>
+            <label><input id="settingsRestore" type="checkbox" /> Load last used ROM on startup</label>
+            <label hidden><input id="settingsCache" type="checkbox" /> Cache loaded ROMs to filesystem</label>
+            <p id="settingsCacheHint" hidden>Keeps a copy in your ROM folder, available in Mine. Applies to future ROM loads.</p>
           </dialog>
 
           <nav class="bottom-bar" aria-label="Emulator controls" data-gbc-measure="bottom-bar">
             <button id="pauseButton" type="button">Pause</button>
-            <button id="soundButton" type="button" aria-pressed="false">Sound</button>
+            <button id="soundButton" type="button" aria-pressed="false" disabled>Sound</button>
             <button id="gamesButton" type="button">Games</button>
-            <button id="saveFileButton" type="button">Save File</button>
+            <button id="settingsButton" type="button" aria-label="Settings" title="Settings">Settings</button>
+            <button id="saveFileButton" type="button" title="Load a game to use save files" disabled>Save File</button>
           </nav>
 
           <output id="statusMirror" class="status-mirror" aria-hidden="true"></output>
